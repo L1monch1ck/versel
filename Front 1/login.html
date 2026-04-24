@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Campus Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="img/_-removebg-preview.png" alt="Logo" class="loogo1">
+            <h2>Campus Smart</h2>
+        </div>
+        <div class="cont">
+            <a href="index.html">Home</a>
+            <a href="report.html">Report</a>
+            <a href="issues.html">Issues</a>
+            <a href="login.html" class="active">Login</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </nav>
+
+    <div class="auth-section">
+        <div class="auth-container">
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to continue</p>
+
+            <input type="email" id="email" class="auth-input" placeholder="Email address" required>
+            <input type="password" id="password" class="auth-input" placeholder="Password" required>
+
+            <button class="auth-button-login" onclick="login()">Login</button>
+            <button class="auth-button-register" onclick="register()">Create New Account</button>
+
+            <p class="auth-message" id="message"></p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report an Issue - Campus Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        /* Кастомное модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 {
+            color: #22c55e;
+            margin-bottom: 10px;
+        }
+        .modal-content p {
+            color: #475569;
+            margin-bottom: 25px;
+        }
+        .modal-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+     <nav>
+        <div class="logo">
+            <img src="img/_-removebg-preview.png" alt="Logo" class="loogo1">
+            <h2>Campus Smart</h2>
+        </div>
+        <div class="cont">
+            <a href="index.html" class="active">Home</a>
+            <a href="report.html">Report</a>
+            <a href="issues.html">Issues</a>
+            <a href="#" onclick="logout()">Logout</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </nav>
+
+    <!-- ... nav и форма остаются те же ... -->
+
+    <div class="report_container">
+        <h2>Report a New Issue</h2>
+        <p class="report-subtitle">Click on the map to select the exact location of the problem</p>
+
+        <form id="reportForm">
+            <label for="title">Issue Title *</label>
+            <input type="text" id="title" placeholder="e.g. Broken lamp near entrance" required>
+
+            <label for="description">Description *</label>
+            <textarea id="description" placeholder="Describe the problem in detail..." required></textarea>
+
+            <div class="location-info">
+                <label>Location Coordinates</label>
+                <div class="coords">
+                    <input type="text" id="lat" placeholder="Latitude" readonly>
+                    <input type="text" id="lng" placeholder="Longitude" readonly>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" onclick="getLocation()" class="btn-location">📍 Use My Location</button>
+                <button type="submit" class="btn-submit">Submit Report</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="map-wrapper">
+        <p class="map-instruction"><strong>Click on the map</strong> to set the issue location</p>
+        <div id="map"></div>
+    </div>
+
+    <!-- Кастомное модальное окно -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <h3>✅ Report Submitted Successfully!</h3>
+            <p>Thank you for helping improve the campus.</p>
+            <button class="modal-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem("user")) window.location.href = "login.html";
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        // Границы карты
+        const campusBounds = L.latLngBounds([2.8078, 101.7570], [2.8164, 101.7596]);
+
+        const map = L.map('map', {
+            maxBounds: campusBounds,
+            maxBoundsViscosity: 1.0,
+            minZoom: 15,
+            maxZoom: 19
+        }).setView([2.8121, 101.7583], 17);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.rectangle(campusBounds, { color: "#ef4444", weight: 2, fillOpacity: 0.05 }).addTo(map);
+
+        let currentMarker = null;
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            if (currentMarker) map.removeLayer(currentMarker);
+            currentMarker = L.marker([lat, lng]).addTo(map)
+                .bindPopup("Issue location selected").openPopup();
+
+            document.getElementById("lat").value = lat.toFixed(6);
+            document.getElementById("lng").value = lng.toFixed(6);
+        });
+
+        function getLocation() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.setView([lat, lng], 18);
+                if (currentMarker) map.removeLayer(currentMarker);
+                currentMarker = L.marker([lat, lng]).addTo(map).bindPopup("Your location").openPopup();
+                document.getElementById("lat").value = lat.toFixed(6);
+                document.getElementById("lng").value = lng.toFixed(6);
+            });
+        }
+
+        // Отправка формы
+        document.getElementById("reportForm").onsubmit = async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById("title").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const lat = document.getElementById("lat").value;
+            const lng = document.getElementById("lng").value;
+
+            if (!title || !description || !lat || !lng) {
+                alert("Please fill all fields and select location on map.");
+                return;
+            }
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/report", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ title, description, lat: parseFloat(lat), lng: parseFloat(lng), status: "pending" })
+                });
+
+                if (res.ok) {
+                    document.getElementById("successModal").style.display = "flex";
+                    document.getElementById("reportForm").reset();
+                    if (currentMarker) map.removeLayer(currentMarker);
+                    currentMarker = null;
+                } else {
+                    alert("Failed to submit report.");
+                }
+            } catch (err) {
+                alert("Cannot connect to server.");
+            }
+        };
+
+        function closeModal() {
+            document.getElementById("successModal").style.display = "none";
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

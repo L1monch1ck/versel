@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Campus Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            color: white;
+            text-align: center;
+            padding: 50px 20px 40px;
+        }
+        .admin-header h1 { font-size: 2.8rem; margin-bottom: 8px; }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        .admin-table th {
+            background: #b91c1c;
+            color: white;
+            padding: 18px 12px;
+            text-align: left;
+        }
+        .admin-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #fee2e2;
+        }
+        .admin-table tr:hover {
+            background: #fef2f2;
+        }
+        .status-badge {
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        .btn-action {
+            padding: 9px 16px;
+            margin: 3px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-pending { background: #fee2e2; color: #b91c1c; }
+        .btn-progress { background: #fef3c7; color: #d97706; }
+        .btn-resolved { background: #dcfce7; color: #16a34a; }
+        .btn-delete { background: #fecaca; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="img/_-removebg-preview.png" alt="Logo" class="loogo1">
+            <h2>Campus Smart - Admin</h2>
+        </div>
+        <div class="cont">
+            <a href="index.html">Home</a>
+            <a href="issues.html">Issues</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="admin-header">
+        <h1>Admin Panel</h1>
+        <p>Manage all reported issues • Update status and delete reports</p>
+    </div>
+
+    <div class="admin-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Coordinates</th>
+                    <th>Current Status</th>
+                    <th>Change Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Защита админки
+        const currentUser = localStorage.getItem("user");
+        if (currentUser !== "inti-campus-smart-admin-panel@gmail.com") {
+            alert("Access Denied! Only administrator can enter this panel.");
+            window.location.href = "index.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        async function loadAdminReports() {
+            const tbody = document.getElementById("adminTableBody");
+            tbody.innerHTML = "";
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/reports");
+                const reports = await res.json();
+
+                reports.forEach(report => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td><strong>#${report.id}</strong></td>
+                        <td>${report.title}</td>
+                        <td>${report.description ? report.description.substring(0, 70) + '...' : '-'}</td>
+                        <td>${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}</td>
+                        <td><span class="status-badge status-${report.status}">${report.status}</span></td>
+                        <td>
+                            <button class="btn-action btn-pending" onclick="updateStatus(${report.id}, 'pending')">Pending</button>
+                            <button class="btn-action btn-progress" onclick="updateStatus(${report.id}, 'in_progress')">In Progress</button>
+                            <button class="btn-action btn-resolved" onclick="updateStatus(${report.id}, 'resolved')">Resolved</button>
+                        </td>
+                        <td>
+                            <button class="btn-action btn-delete" onclick="deleteReport(${report.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:30px;">Error loading reports. Make sure backend is running.</td></tr>`;
+            }
+        }
+
+        // Обновление статуса (используем PUT как в твоём FastAPI)
+        async function updateStatus(id, newStatus) {
+            if (!confirm(`Change status to "${newStatus}"?`)) return;
+
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/report/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    loadAdminReports();
+                } else {
+                    alert("Failed to update status");
+                }
+            } catch (err) {
+                alert("Server error");
+            }
+        }
+
+        async function deleteReport(id) {
+            if (!confirm("Delete this report permanently?")) return;
+
+            try {
+                await fetch(`http://127.0.0.1:8000/report/${id}`, { method: "DELETE" });
+                loadAdminReports();
+            } catch (err) {
+                alert("Failed to delete");
+            }
+        }
+
+        // Загрузка при открытии
+        loadAdminReports();
+    </script>
+</body>
+</html>

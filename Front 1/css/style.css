@@ -1,0 +1,583 @@
+/* ====================== RESET & BASE ====================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SN Pro', system-ui, sans-serif;
+    background: #ffffff;
+    color: #1f2937;
+    line-height: 1.6;
+}
+
+/* ====================== NAVIGATION ====================== */
+nav {
+    background: #b91c1c;
+    padding: 16px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+}
+
+.loogo1 {
+    width: 45px;
+    height: 45px;
+}
+
+.logo h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+.cont {
+    display: flex;
+    gap: 20px;
+}
+
+.cont a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.cont a:hover,
+.cont a.active {
+    color: #fecaca;
+}
+
+/* ====================== HERO ====================== */
+.hero {
+    background: #ffffff;
+    text-align: center;
+    padding: 90px 5% 80px;
+}
+
+.hero h1 {
+    font-size: 3.1rem;
+    margin-bottom: 30px;
+    font-weight: 700;
+    color: #b91c1c;
+}
+
+.hero-text {
+    font-size: 1.22rem;
+    color: #6b7280;
+    margin-bottom: 28px;
+}
+
+.btn-report,
+.btn-submit {
+    background: #b91c1c;
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.2);
+    transition: 0.3s;
+}
+
+.btn-report:hover,
+.btn-submit:hover {
+    background: #991b1b;
+    transform: translateY(-3px);
+}
+
+/* ====================== SECTIONS ====================== */
+.stats-section,
+.map-section,
+.map-container {
+    background: #ffffff;
+    padding: 60px 5%;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 2.3rem;
+    margin-bottom: 50px;
+    color: #b91c1c;
+}
+
+/* ====================== CARDS ====================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.stat-card,
+.report_container,
+.reports-list {
+    background: #ffffff;
+    border: 2px solid #fee2e2;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.08);
+    transition: 0.3s;
+}
+
+.stat-card:hover,
+.report_container:hover {
+    transform: translateY(-5px);
+}
+
+.icon-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.warning { background: #b91c1c; color: white; }
+.pending { background: #dc2626; color: white; }
+.resolved { background: #16a34a; color: white; }
+
+/* ====================== MAP ====================== */
+.main-map,
+.big-map,
+#map {
+    height: 520px;
+    width: 100%;
+    border-radius: 20px;
+    border: 2px solid #fecaca;
+    box-shadow: 0 8px 25px rgba(185, 28, 28, 0.1);
+    overflow: hidden;
+}
+
+/* ====================== FILTER BUTTONS ====================== */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0 30px 0;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 26px;
+    border: 2px solid #fecaca;
+    background: white;
+    color: #b91c1c;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: #b91c1c;
+    color: white;
+}
+
+/* ====================== REPORT FORM ====================== */
+.report_container {
+    max-width: 700px;
+    margin: 50px auto;
+}
+
+.report_container h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #b91c1c;
+    margin-bottom: 10px;
+}
+
+.report-subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+#reportForm {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+#reportForm label {
+    font-weight: 600;
+    color: #374151;
+}
+
+#reportForm input,
+#reportForm textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+#reportForm input:focus,
+#reportForm textarea:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.08);
+}
+
+#reportForm textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.coords {
+    display: flex;
+    gap: 12px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-location {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-location:hover {
+    background: #fecaca;
+}
+
+.btn-submit {
+    flex: 1;
+}
+
+/* ====================== REPORT LIST ====================== */
+.report-item {
+    padding: 18px 24px;
+    border-bottom: 1px solid #fee2e2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-item:hover {
+    background: #fef2f2;
+}
+
+.report-status {
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-in_progress {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-resolved {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* ====================== RESPONSIVE ====================== */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.4rem;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+
+    .coords {
+        flex-direction: column;
+    }
+
+    .report-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+
+/* ==================== REPORT PAGE IMPROVEMENTS ==================== */
+.report_container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.map-wrapper {
+    max-width: 800px;
+    margin: 0 auto 60px auto;   /* Большой отступ снизу */
+    padding: 0 20px;            /* Отступы с боков */
+}
+
+.map-instruction {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #475569;
+    font-weight: 500;
+}
+
+#map {
+    height: 480px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e2e8f0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .map-wrapper {
+        padding: 0 15px;
+        margin-bottom: 40px;
+    }
+    #map {
+        height: 420px;
+    }
+}
+
+
+
+.issues-header {
+    text-align: center;
+    padding: 40px 5% 25px;
+    background: #f8fafc;
+}
+
+.issues-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #1e2937;
+}
+
+.issues-header p {
+    color: #64748b;
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+/* ====================== LOGIN / AUTH PAGE ====================== */
+.auth-section {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc, #fee2e2);
+    padding: 40px 20px;
+}
+
+.auth-container {
+    background: white;
+    padding: 50px 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(185, 28, 28, 0.12);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    border: 2px solid #fee2e2;
+}
+
+.auth-title {
+    font-size: 2.2rem;
+    color: #b91c1c;
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+    color: #6b7280;
+    margin-bottom: 35px;
+    font-size: 1.05rem;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    border: 2px solid #fecaca;
+    border-radius: 14px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    outline: none;
+}
+
+.auth-input:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.1);
+}
+
+.auth-button-login,
+.auth-button-register {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+}
+
+.auth-button-login {
+    background: #b91c1c;
+    color: white;
+}
+
+.auth-button-login:hover {
+    background: #991b1b;
+    transform: translateY(-2px);
+}
+
+.auth-button-register {
+    background: #ffffff;
+    color: #b91c1c;
+    border: 2px solid #fecaca;
+}
+
+.auth-button-register:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+}
+
+.auth-message {
+    margin-top: 20px;
+    font-weight: 500;
+    min-height: 24px;
+}
+
+/* Улучшение для мобильных */
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 40px 25px;
+        margin: 10px;
+    }
+    
+    .auth-title {
+        font-size: 1.9rem;
+    }
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stat-card {
+    background: white;
+    border: 2px solid #fee2e2;
+    border-radius: 16px;
+    padding: 28px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.08);
+    min-height: 140px;   /* Чтобы все карточки были одной высоты */
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+}
+
+.icon-circle {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.warning { background: #b91c1c; color: white; }
+.pending { background: #dc2626; color: white; }
+.in-progress { background: #f59e0b; color: white; }
+.resolved { background: #16a34a; color: white; }
+
+
+
+
+
+    /* ... твои остальные стили ... */
+
+    /* ====================== MAP FOOTER ====================== */
+    .map-footer {
+        margin-top: 35px;
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .map-footer .btn-secondary {
+        padding: 14px 34px;
+        font-size: 1.08rem;
+        font-weight: 600;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-footer .btn-secondary:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .map-footer .btn-secondary:first-child {
+        background: #b91c1c;
+        color: white;
+    }
+
+    .map-footer .btn-secondary:first-child:hover {
+        background: #991b1b;
+    }
+
+    .map-footer .btn-secondary:last-child {
+        background: #64748b;
+        color: white;
+    }
+
+    .map-footer .btn-secondary:last-child:hover {
+        background: #475569;
+    }

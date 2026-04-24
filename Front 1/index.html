@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="img/_-removebg-preview.png" alt="Logo" class="loogo1">
+            <h2>Campus Smart</h2>
+        </div>
+        <div class="cont">
+            <a href="index.html" class="active">Home</a>
+            <a href="report.html">Report</a>
+            <a href="issues.html">Issues</a>
+            <a href="#" onclick="logout()">Logout</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Campus Smart</h1>
+        <p class="hero-text">Campus Smart is a simple platform that allows students and staff to report problems on campus quickly and easily.</p>
+        <p class="hero-text">Whether it's broken equipment, trash, or lighting issues, you can submit a report in just a few clicks.</p>
+        <a href="report.html"><button class="btn-report">Report a Problem</button></a>
+    </div>
+
+    <div class="stats-section">
+        <h2 class="section-title">Issue Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon-circle warning"><span>!</span></div>
+                <div class="stat-info">
+                    <p class="stat-label">Total Issues</p>
+                    <h1 id="total">0</h1>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon-circle pending"><span>⏰</span></div>
+                <div class="stat-info">
+                    <p class="stat-label">Pending</p>
+                    <h1 id="pending">0</h1>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon-circle in-progress"><span>🔧</span></div>
+                <div class="stat-info">
+                    <p class="stat-label">In Progress</p>
+                    <h1 id="in_progress">0</h1>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon-circle resolved"><span>✔</span></div>
+                <div class="stat-info">
+                    <p class="stat-label">Resolved</p>
+                    <h1 id="resolved">0</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-section">
+        <h2 class="section-title">Live Campus Map</h2>
+        <p class="section-subtitle">Click on the map to report a new issue</p>
+        
+        <div class="map-container">
+            <div id="map" class="main-map"></div>
+        </div>
+        
+        <div class="map-footer">
+            <a href="report.html" class="btn-secondary">Report New Issue</a>
+            <a href="issues.html" class="btn-secondary" style="margin-left: 15px; background:#64748b;">View All Issues →</a>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem("user")) {
+            window.location.href = "login.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        // Границы карты
+        const campusBounds = L.latLngBounds([2.8078, 101.7570], [2.8164, 101.7596]);
+
+        const map = L.map('map', {
+            maxBounds: campusBounds,
+            maxBoundsViscosity: 1.0,
+            minZoom: 15,
+            maxZoom: 19
+        }).setView([2.8121, 101.7583], 17);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.rectangle(campusBounds, {
+            color: "#ef4444",
+            weight: 3,
+            fillOpacity: 0.08
+        }).addTo(map);
+
+        let markers = [];
+
+        async function loadStats() {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/stats");
+                const data = await res.json();
+
+                document.getElementById("total").innerText = data.total || 0;
+                document.getElementById("pending").innerText = data.pending || 0;
+                document.getElementById("in_progress").innerText = data.in_progress || 0;
+                document.getElementById("resolved").innerText = data.resolved || 0;
+            } catch (err) {
+                console.error("Failed to load stats");
+            }
+        }
+
+        async function loadReports() {
+            try {
+                markers.forEach(m => map.removeLayer(m));
+                markers = [];
+
+                const res = await fetch("http://127.0.0.1:8000/reports");
+                const data = await res.json();
+
+                data.forEach(r => {
+                    const color = r.status === "resolved" ? "#22c55e" : "#ef4444";
+                    const marker = L.circleMarker([r.lat, r.lng], {
+                        radius: 9,
+                        fillColor: color,
+                        color: "#fff",
+                        weight: 3,
+                        fillOpacity: 0.9
+                    }).addTo(map);
+
+                    marker.bindPopup(`<b>${r.title}</b><br>Status: ${r.status}`);
+                    markers.push(marker);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        loadStats();
+        loadReports();
+
+        setInterval(() => {
+            loadStats();
+            loadReports();
+        }, 8000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Issues - Campus Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="img/_-removebg-preview.png" alt="Logo" class="loogo1">
+            <h2>Campus Smart</h2>
+        </div>
+        <div class="cont">
+            <a href="index.html">Home</a>
+            <a href="report.html">Report</a>
+            <a href="issues.html" class="active">Issues</a>
+            <a href="#" onclick="logout()">Logout</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </nav>
+
+    <div class="issues-header">
+        <h1>All Campus Issues</h1>
+        <p>Real-time map and list of all reported problems</p>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="in_progress">In Progress</button>
+        <button class="filter-btn" data-filter="resolved">Resolved</button>
+    </div>
+
+    <div class="map-container">
+        <div id="map" class="big-map"></div>
+    </div>
+
+    <div class="reports-list" id="reportsList"></div>
+
+    <script>
+        if (!localStorage.getItem("user")) window.location.href = "login.html";
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        // ====================== ГРАНИЦЫ КАРТЫ ======================
+        const campusBounds = L.latLngBounds(
+            [2.8078, 101.7570],
+            [2.8164, 101.7596]
+        );
+
+        const map = L.map('map', {
+            maxBounds: campusBounds,
+            maxBoundsViscosity: 1.0,
+            minZoom: 15,
+            maxZoom: 19
+        }).setView([2.8121, 101.7583], 17);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.rectangle(campusBounds, {
+            color: "#ef4444",
+            weight: 2,
+            fillOpacity: 0.05
+        }).addTo(map);
+
+        let markers = [];
+        let currentFilter = "all";
+
+        const statusColors = {
+            pending:     { color: "#ef4444", name: "Pending" },
+            in_progress: { color: "#f59e0b", name: "In Progress" },
+            resolved:    { color: "#22c55e", name: "Resolved" }
+        };
+
+        // Загрузка маркеров на карту
+        async function loadReports(filter = "all") {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/reports");
+                const data = await res.json();
+
+                data.forEach(r => {
+                    if (filter !== "all" && r.status !== filter) return;
+
+                    const info = statusColors[r.status] || statusColors.pending;
+                    const marker = L.circleMarker([r.lat, r.lng], {
+                        radius: 11,
+                        fillColor: info.color,
+                        color: "#fff",
+                        weight: 3.5,
+                        fillOpacity: 0.95
+                    }).addTo(map);
+
+                    marker.bindPopup(`<b>${r.title}</b><br>${r.description || ''}<br><strong>Status:</strong> ${info.name}`);
+                    markers.push(marker);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        // Загрузка списка репортов
+        async function loadReportsList() {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/reports");
+                const data = await res.json();
+                const container = document.getElementById("reportsList");
+
+                let html = `<h2 style="padding:20px 24px; border-bottom:1px solid #e2e8f0; text-align:center;">
+                    All Reports (${data.length})
+                </h2>`;
+                
+                data.forEach(r => {
+                    const statusName = statusColors[r.status] ? statusColors[r.status].name : "Unknown";
+                    html += `
+                        <div class="report-item">
+                            <div class="report-info">
+                                <h3>${r.title}</h3>
+                                <p>${r.description ? r.description.substring(0,100)+'...' : ''}</p>
+                            </div>
+                            <span class="report-status status-${r.status}">${statusName}</span>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        // Фильтры
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                loadReports(currentFilter);
+            });
+        });
+
+        // Запуск
+        loadReports("all");
+        loadReportsList();
+
+        // Автообновление
+        setInterval(() => {
+            loadReports(currentFilter);
+            loadReportsList();
+        }, 20000);
+    </script>
+</body>
+</html>
